@@ -6,16 +6,26 @@
 const db = require("../../db/connection");
 
 exports.selectTopics = () => {
-  console.log('selecttopics');
   let queryString = `
   SELECT *
   FROM topics`; 
+  return db.query(queryString).then((result) => {
+    return result.rows;
+  });
+};
 
-  console.log(queryString);
+exports.selectArticles = () => {
+  let queryString = 
+  `SELECT articles.author, title, articles.article_id, topic,
+  articles.created_at, articles.votes, article_img_url,
+  COUNT (comments.comment_id) AS comment_count
+  FROM articles
+  LEFT OUTER JOIN comments
+  ON comments.article_id = articles.article_id
+  GROUP BY articles.article_id
+  ORDER BY created_at DESC;`
 
   return db.query(queryString).then((result) => {
-    console.log('result');
-    console.log(result.rows);
     return result.rows;
   });
 };
