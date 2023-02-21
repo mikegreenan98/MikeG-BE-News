@@ -10,7 +10,6 @@ const {
   getTopics,
   getOneArticle,
   getArticles,
-  getCommentsOnArticle,
 } = require("../code/controllers/controllers");
 
 // const {handleCustomErrors} = require('./error_handling_controllers');
@@ -27,11 +26,10 @@ app.use(express.json());
 
 app.get("/api/topics", getTopics);
 
-app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:articles_id", getOneArticle);
 
-app.get("/api/articles/:articles_id/comments", getCommentsOnArticle);
+app.get("/api/articles", getArticles);
 
 
 
