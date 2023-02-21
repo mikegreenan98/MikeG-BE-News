@@ -49,3 +49,4 @@ exports.getCommentsOnArticle = (req, res, next) => {
     next(err);
   });
 };
+
