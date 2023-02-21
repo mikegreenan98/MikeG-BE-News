@@ -20,4 +20,21 @@ exports.selectTopics = () => {
   });
 };
 
+exports.selectOneArticle = (request) => {
+  const articleID = request.params.articles_id;
+  if(!Number.isInteger(+articleID)){
+    return Promise.reject('Invalid article was provided by client');
+  };
 
+  let queryString = `
+  SELECT *
+  FROM articles
+  WHERE article_id = ${articleID}`; 
+
+  return db.query(queryString).then((result) => {
+    if(result.rowCount === 0){
+      return Promise.reject('Article not found');
+    }
+    return result.rows;
+  });
+};

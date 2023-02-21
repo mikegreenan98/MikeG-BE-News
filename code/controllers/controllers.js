@@ -2,7 +2,7 @@
 
 // CONTROLLER
 
-const {selectTopics,} = require("../models/models");
+const {selectTopics, selectOneArticle} = require("../models/models");
   
 exports.getTopics = (req, res, next) => {
 console.log("controller");
@@ -17,4 +17,13 @@ console.log("controller");
     });
 };
 
-  
+
+exports.getOneArticle = (req, res, next) => {
+  selectOneArticle(req)
+      .then((result) => {
+        res.status(200).send({ article: result });
+  })
+  .catch((err) => {
+    next(err);  
+  });
+};

@@ -4,9 +4,11 @@
 
 const express = require("express");
 const app = express();
+const {handleCustomErrors, handle500Error, handlePSQL400Error} = require('./error_handling_controllers');
 
 const {
   getTopics,
+  getOneArticle,
 } = require("../code/controllers/controllers");
 
 // const {handleCustomErrors} = require('./error_handling_controllers');
@@ -22,10 +24,13 @@ app.use((req, res, next) => {
 
 app.get("/api/topics", getTopics);
 
+app.get("/api/articles/:articles_id", getOneArticle);
 
 
+//TBD - see advanced error handlines notes - insert here
 
-//app.use(handle500Error);
-//app.use(handleCustomErrors);
+//app.use(handlePSQL400Error); TBD - Not working yet - need advice
+app.use(handleCustomErrors);
+app.use(handle500Error);
 
 module.exports = app;
