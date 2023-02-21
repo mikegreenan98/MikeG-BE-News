@@ -1,40 +1,51 @@
-
-
 // CONTROLLER
 
+const {
+  selectTopics,
+  selectArticles,
+  selectOneArticle,
+  selectCommentsForArticle,
+} = require("../models/models");
 
-const {selectTopics,selectArticles, selectOneArticle} = require("../models/models");
-
-  
 exports.getTopics = (req, res, next) => {
   selectTopics()
-      .then((result) => {
-        res.status(200).send({ topics: result });
+    .then((result) => {
+      res.status(200).send({ topics: result });
     })
     .catch((err) => {
-      next(err);  
+      next(err);
     });
 };
 
-
+exports.getArticles = (req, res, next) => {
+  selectArticles()
+    .then((result) => {
+      res.status(200).send({ articles: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
 
 exports.getOneArticle = (req, res, next) => {
   selectOneArticle(req)
-      .then((result) => {
-        res.status(200).send({ article: result });
-  })
-  .catch((err) => {
-    next(err);  
-  });
+    .then((result) => {
+      res.status(200).send({ article: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
-exports.getArticles = (req, res, next) => {
-    selectArticles()
-        .then((result) => {
-          res.status(200).send({ articles: result });
-      })
-      .catch((err) => {
-        next(err);  
-      });
-  };
+exports.getCommentsOnArticle = (req, res, next) => {
+  const articleExistsPromise = selectOneArticle(req);
+  const commentsExistPromise = selectCommentsForArticle(req);
 
+  Promise.all([commentsExistPromise,articleExistsPromise])
+  .then((result) => {
+    res.status(200).send({ comments: result[0] });
+  })
+  .catch((err) => {
+    next(err);
+  });
+};
