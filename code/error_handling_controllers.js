@@ -9,9 +9,15 @@ exports.handleCustomErrors = (error, request, response, next) => {
         response.status(400).send({msg: error});
     } else if(error === "Invalid article provided by client - not possible to search comments"){
         response.status(400).send({msg: error});
+    } else if(error === "Bad Request - no inc_votes provided"){
+        response.status(400).send({msg: error});
+    } else if(error === "Bad Request - inc_votes must be an integer"){
+        response.status(400).send({msg: error});
+    } else if(error === "Bad Request - article_id must be an integer"){
+        response.status(400).send({msg: error});
     } else {
         next(error); //otherwise go to next error handler
-    }
+    };
 };
 
 exports.handlePSQL400Error = (err, req, res, next) =>{

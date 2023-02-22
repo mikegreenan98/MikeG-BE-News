@@ -47,16 +47,45 @@ exports.selectOneArticle = (request) => {
 exports.selectCommentsForArticle = (request) => {
   const articleID = request.params.articles_id;
   if (!Number.isInteger(+articleID)) {
-    return Promise.reject("Invalid article provided by client - not possible to search comments");
+    return Promise.reject(
+      "Invalid article provided by client - not possible to search comments"
+    );
   }
   let queryString = `
   SELECT *
   FROM comments
   WHERE article_id = ${articleID}
   ORDER BY created_at DESC`;
-  
+
   return db.query(queryString).then((result) => {
     return result.rows;
   });
+};
 
+exports.updateArticleVotes = (request) => {
+  const articleID = request.params.articles_id;
+  const incValue = request.body.inc_votes;
+
+  if (incValue === undefined) {
+    return Promise.reject("Bad Request - no inc_votes provided");
+  }
+  if (!Number.isInteger(+incValue)) {
+    return Promise.reject("Bad Request - inc_votes must be an integer");
+  }
+  if (!Number.isInteger(+articleID)) {
+    return Promise.reject("Bad Request - article_id must be an integer");
+  }
+
+  let queryString = `
+  UPDATE articles
+  SET votes = votes + ${incValue}
+  WHERE article_id = ${articleID}
+  RETURNING *`;
+
+  return db.query(queryString).then((result) => {
+    if (result.rowCount === 0) {
+      return Promise.reject("Article not found");
+    }
+    return result.rows;
+  });
 };
