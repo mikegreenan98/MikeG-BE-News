@@ -12,11 +12,25 @@
 
 -- SELECT * FROM articles;
 
-SELECT title, articles.article_id, COUNT (comments.comment_id) AS comment_count
-FROM articles
-LEFT OUTER JOIN comments
-ON comments.article_id = articles.article_id
-GROUP BY articles.article_id;
+-- SELECT title, articles.article_id, COUNT (comments.comment_id) AS comment_count
+-- FROM articles
+-- LEFT OUTER JOIN comments
+-- ON comments.article_id = articles.article_id
+-- GROUP BY articles.article_id;
+
+SELECT * FROM comments;
+
+
+-- INSERT INTO comments
+-- (body, author, article_id, votes, created_at) 
+-- VALUES
+-- ('body77','author77',77,66);
+
+INSERT INTO comments
+(body, author, article_id, votes) 
+VALUES
+('body77','lurker',2,77)
+RETURNING *;
 
 
 

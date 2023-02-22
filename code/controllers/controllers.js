@@ -5,6 +5,8 @@ const {
   selectArticles,
   selectOneArticle,
   selectCommentsForArticle,
+  insertComment,
+  selectUsers,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -41,11 +43,31 @@ exports.getCommentsOnArticle = (req, res, next) => {
   const articleExistsPromise = selectOneArticle(req);
   const commentsExistPromise = selectCommentsForArticle(req);
 
-  Promise.all([commentsExistPromise,articleExistsPromise])
-  .then((result) => {
-    res.status(200).send({ comments: result[0] });
-  })
-  .catch((err) => {
-    next(err);
-  });
+  Promise.all([commentsExistPromise, articleExistsPromise])
+    .then((result) => {
+      res.status(200).send({ comments: result[0] });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.postComment = (req, res, next) => {
+  insertComment(req)
+    .then((result) => {
+      res.status(200).send({ comment: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getUsers = (req, res, next) => {
+  selectUsers()
+    .then((result) => {
+      res.status(200).send({ users: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };

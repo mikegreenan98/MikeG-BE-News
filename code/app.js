@@ -11,6 +11,8 @@ const {
   getOneArticle,
   getArticles,
   getCommentsOnArticle,
+  getUsers,
+  postComment,
 } = require("../code/controllers/controllers");
 
 // const {handleCustomErrors} = require('./error_handling_controllers');
@@ -32,6 +34,14 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:articles_id", getOneArticle);
 
 app.get("/api/articles/:articles_id/comments", getCommentsOnArticle);
+
+
+
+
+// 07
+app.post("/api/articles/:articles_id/comments", postComment);
+// 09
+app.get("/api/users", getUsers);
 
 
 
