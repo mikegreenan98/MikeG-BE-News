@@ -8,6 +8,7 @@ const {
   insertComment,
   selectUsers,
   selectOneUser,
+  updateArticleVotes,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -53,10 +54,18 @@ exports.getCommentsOnArticle = (req, res, next) => {
     });
 };
 
-
+exports.pushArticleVotes = (req, res, next) => {
+  updateArticleVotes(req)
+    .then((result) => {
+      res.status(200).send({ article: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
 
 exports.postComment = (req, res, next) => {
-  //Frstly, need to check of article exists before trying to insert a comment fo that article
+  //Firstly, need to check of article exists before trying to insert a comment fo that article
   selectOneArticle(req)
     .then((result) => {
       // Secondly, need to check user exists before trying to insert a comment
@@ -72,11 +81,11 @@ exports.postComment = (req, res, next) => {
             });
         })
         .catch((err) => {
-          next(err);
+              next(err);
         });
     })
     .catch((err) => {
-      next(err);
+              next(err);
     });
 };
 
