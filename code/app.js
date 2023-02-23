@@ -2,7 +2,7 @@
 //   APP
 const express = require("express");
 const app = express();
-const {handleCustomErrors, handle500Error, handlePSQL400Error} = require('./error_handling_controllers');
+const {handleCustomErrors, handle500Error, handlePSQLErrors} = require('./error_handling_controllers');
 
 const {
   getTopics,
@@ -16,7 +16,7 @@ const {
 
 app.use(express.json());
 
-// Use for Debugging:
+// Useful for Debugging:
 // app.use((req, res, next) => {
 //   console.log(`normal chain ${req.method} and ${req.url}`);
 //   next(); 
@@ -38,8 +38,10 @@ app.patch("/api/articles/:articles_id", pushArticleVotes);
 // 09
 app.get("/api/users", getUsers);
 
-//app.use(handlePSQL400Error); TBD - Not working yet - need advice
+// error handlers below here - in order of call preferences
+// i.e. 500 handler if nothing else handles the error
 app.use(handleCustomErrors);
+app.use(handlePSQLErrors);
 app.use(handle500Error);
 
 module.exports = app;

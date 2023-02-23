@@ -34,7 +34,7 @@ exports.selectOneArticle = (request) => {
   let queryString = `
   SELECT *
   FROM articles
-  WHERE article_id = ${articleID}`;
+  WHERE article_id = '${articleID}'`;
 
   return db.query(queryString).then((result) => {
     if (result.rowCount === 0) {
@@ -91,13 +91,11 @@ exports.updateArticleVotes = (request) => {
 };
 
 
-
-
 exports.insertComment = (request) => {
   const articleID = request.params.articles_id;
   const commentsReceived = request.body;
   // construct the comment to insert:
-  let commentToInsert = {
+  let comment = {
     //comment_id: --> to be provided by the psql query,
     body: commentsReceived.body,
     article_id: articleID,
@@ -105,19 +103,24 @@ exports.insertComment = (request) => {
     votes: 0,
     // created_at: --> psql will provide by using "DEFAULT NOW()",
   };
+  // need to avoid SQL injection by using $ format for the query string:
+  const valuesArray = [
+    comment.body, comment.author, comment.article_id, comment.votes];
+
   let queryString = `
   INSERT INTO comments
   (body, author, article_id, votes) 
   VALUES
-  ('${commentToInsert.body}','${commentToInsert.author}',${commentToInsert.article_id},${commentToInsert.votes})
+  ($1, $2, $3, $4)
   RETURNING *;`;
-  return db.query(queryString).then((result) => {
+  return db.query(queryString, valuesArray).then((result) => {
     if (result.rowCount === 0) {
       return Promise.reject("Article not found");
     }
     return result.rows;
   });
 };
+
 
 exports.selectUsers = () => {
   let queryString = `
@@ -130,9 +133,6 @@ exports.selectUsers = () => {
 
 exports.selectOneUser = (req) => {
   let user = req.body.username;
-  // if (!Number.isInteger(+user)) {
-  //   return Promise.reject("Bad Request - User does not exist");
-  // }
   let queryString = `
   SELECT *
   FROM users
@@ -140,7 +140,8 @@ exports.selectOneUser = (req) => {
   return db.query(queryString).then((result) => {
     if (result.rowCount === 0) {
       return Promise.reject("Bad Request - User does not exist");
-    }
+    } else{
     return result.rows;
+    }
   });
 };

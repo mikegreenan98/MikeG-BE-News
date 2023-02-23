@@ -1,4 +1,3 @@
-//
 
 const request = require("supertest");
 const app = require("../code/app");
@@ -272,21 +271,6 @@ describe("GET /api/articles/:article_id/comments --- error handling", () => {
   });
 });
 
-// describe('Tests for general SQL errors', () => {
-//BELOW DOES NOW WORK - NEED HELP TO UNDERSTAND WEHY NOT??
-
-// test.only("SQL error", () => {
-//   return db.query(`DROP TABLE IF EXISTS articles;`)
-//   .then(() => {
-//     return request(app).get("/api/articles/3").expect(500)
-//     .then((data) => {
-//       const expected = {msg: "Server error"};
-//       expect(data.body).toEqual(expected);
-//   });
-// });
-// });
-// });
-
 
 
 describe("PATCH /api/articles/:article_id", () => {
@@ -388,32 +372,23 @@ describe("PATCH /api/articles/:article_id --- error handling", () => {
 });
 
 
-
-
-
-
-
-
-
-
-
 // ======== 07 ==========
 
 describe("POST /api/articles/:article_id/comments", () => {
   const validInput = { username: "lurker", body: "a valid body" };
 
-  test("200 status code received when calling api correctly", () => {
+  test("201 status code received when calling api correctly", () => {
     return request(app)
       .post("/api/articles/2/comments")
       .send(validInput)
-      .expect(200);
+      .expect(201);
   });
 
   test("returns a single comment object in the format {comment: [{comment-obj}]}", () => {
     return request(app)
       .post("/api/articles/2/comments")
       .send(validInput)
-      .expect(200)
+      .expect(201)
       .then((data) => {
         expect(data.body).toMatchObject({
           comment: expect.any(Object),
@@ -427,7 +402,7 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/2/comments")
       .send(validInput)
-      .expect(200)
+      .expect(201)
       .then((data) => {
         expect(data.body.comment[0]).toMatchObject({
           comment_id: expect.any(Number),
@@ -437,6 +412,7 @@ describe("POST /api/articles/:article_id/comments", () => {
           votes: expect.any(Number),
           created_at: expect.any(String),
         });
+        expect(data.body.comment[0].article_id).toBe(2);
       });
   });
 
@@ -452,7 +428,7 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/10/comments")
       .send(validInput)
-      .expect(200)
+      .expect(201)
       .then((data) => {
         expect(data.body.comment[0].comment_id).toEqual(
           expectedComment.comment_id
@@ -470,38 +446,39 @@ describe("POST /api/articles/:article_id/comments", () => {
 describe("POST /api/articles/:article_id/comments - error handling", () => {
   const validInput = { username: "lurker", body: "a valid body" };
 
-  test("when username provided is not in users DB, return 400 - Bad Request - User does not exist", () => {
-  const badInput = { username: "FREDDIE5000", body: "a valid body" };
+  test("when username provided is not in users DB, return 404 - Not found", () => {
+  const badInput = { username: "FREDDIE", body: "a valid body" };
     return request(app)
       .post("/api/articles/2/comments")
       .send(badInput)
-      .expect(400)
+      .expect(404)
       .then((data) => {
-        const expected = { msg: "Bad Request - User does not exist" };
+        const expected = { msg: "Not found" };
         expect(data.body).toEqual(expected);
       });
   });
 
-  test("when article_id not an integer - return 400 Invalid article message", () => {
+  test("when article_id not an integer - returns a Bad request error", () => {
     return request(app)
       .post("/api/articles/BAD_ID_9000/comments")
       .send(validInput)
       .expect(400)
       .then((data) => {
         const expected = {
-          msg: "Invalid article was provided by client",
+          // msg: "Invalid article was provided by client",
+          msg: "Bad request",
         };
         expect(data.body).toEqual(expected);
       });
   });
 
-  test("404 {msg: article not found} returned when article is not found", () => {
+  test("404 {msg: Not found} returned when article is not present in the db", () => {
     return request(app)
       .post("/api/articles/888/comments")
       .send(validInput)
       .expect(404)
       .then((data) => {
-        const expected = { msg: "Article not found" };
+        const expected = { msg: "Not found" };
         expect(data.body).toEqual(expected);
       });
   });
