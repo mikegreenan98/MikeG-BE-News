@@ -67,37 +67,21 @@ exports.selectCommentsForArticle = (request) => {
 exports.insertComment = (request) => {
   const articleID = request.params.articles_id;
   const commentsReceived = request.body;
-  // console.log(articleID);
-  // console.log(commentsReceived);
-  // console.log(comment);
-
+  // construct the comment to insert:
   let commentToInsert = {
-    //comment_id: to be provided by the psql query,
+    //comment_id: --> to be provided by the psql query,
     body: commentsReceived.body,
     article_id: articleID,
     author: commentsReceived.username,
     votes: 0,
-    // created_at: psql will provide by using "DEFAULT NOW()",
+    // created_at: --> psql will provide by using "DEFAULT NOW()",
   };
-
-
-  // if (incValue === undefined) {
-  //   return Promise.reject("Bad Request - no inc_votes provided");
-  // }
-  // if (!Number.isInteger(+incValue)) {
-  //   return Promise.reject("Bad Request - inc_votes must be an integer");
-  // }
-  // if (!Number.isInteger(+articleID)) {
-  //   return Promise.reject("Bad Request - article_id must be an integer");
-  // }
-
   let queryString = `
   INSERT INTO comments
   (body, author, article_id, votes) 
   VALUES
   ('${commentToInsert.body}','${commentToInsert.author}',${commentToInsert.article_id},${commentToInsert.votes})
   RETURNING *;`;
-  
   return db.query(queryString).then((result) => {
     if (result.rowCount === 0) {
       return Promise.reject("Article not found");
@@ -106,13 +90,25 @@ exports.insertComment = (request) => {
   });
 };
 
-
-
 exports.selectUsers = () => {
   let queryString = `
   SELECT *
   FROM users`;
   return db.query(queryString).then((result) => {
+    return result.rows;
+  });
+};
+
+exports.selectOneUser = (req) => {
+  let user = req.body.username;
+  let queryString = `
+  SELECT *
+  FROM users
+  WHERE username = '${user}'`;
+  return db.query(queryString).then((result) => {
+    if (result.rowCount === 0) {
+      return Promise.reject("Bad Request - User does not exist");
+    }
     return result.rows;
   });
 };

@@ -239,15 +239,15 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-
-
 describe("GET /api/articles/:article_id/comments --- error handling", () => {
   test("400 {msg: Invalid article} is returned when article is invalid ID", () => {
     return request(app)
       .get("/api/articles/BAD_ID_9000/comments")
       .expect(400)
       .then((data) => {
-        const expected = { msg: "Invalid article provided by client - not possible to search comments" };
+        const expected = {
+          msg: "Invalid article provided by client - not possible to search comments",
+        };
         expect(data.body).toEqual(expected);
       });
   });
@@ -266,14 +266,11 @@ describe("GET /api/articles/:article_id/comments --- error handling", () => {
       .get("/api/articles/4/comments")
       .expect(200)
       .then((data) => {
-        const expected = { comments: []};
+        const expected = { comments: [] };
         expect(data.body).toEqual(expected);
       });
   });
-
-
 });
-
 
 // describe('Tests for general SQL errors', () => {
 //BELOW DOES NOW WORK - NEED HELP TO UNDERSTAND WEHY NOT??
@@ -290,17 +287,16 @@ describe("GET /api/articles/:article_id/comments --- error handling", () => {
 // });
 // });
 
-
-
-
-
 // ======== 07 ==========
 
 describe("POST /api/articles/:article_id/comments", () => {
   const validInput = { username: "lurker", body: "a valid body" };
 
   test("200 status code received when calling api correctly", () => {
-    return request(app).post("/api/articles/2/comments").send(validInput).expect(200);
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(validInput)
+      .expect(200);
   });
 
   test("returns a single comment object in the format {comment: [{comment-obj}]}", () => {
@@ -348,67 +344,58 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(validInput)
       .expect(200)
       .then((data) => {
-        expect(data.body.comment[0].comment_id).toEqual(expectedComment.comment_id);
+        expect(data.body.comment[0].comment_id).toEqual(
+          expectedComment.comment_id
+        );
         expect(data.body.comment[0].body).toEqual(expectedComment.body);
-        expect(data.body.comment[0].article_id).toEqual(expectedComment.article_id);
+        expect(data.body.comment[0].article_id).toEqual(
+          expectedComment.article_id
+        );
         expect(data.body.comment[0].author).toEqual(expectedComment.author);
         expect(data.body.comment[0].votes).toEqual(expectedComment.votes);
       });
   });
 });
 
-// TBD MIKE - work from here on error cases - but for above POST not PATCH
+describe("POST /api/articles/:article_id/comments - error handling", () => {
+  const validInput = { username: "lurker", body: "a valid body" };
 
-// describe("PATCH /api/articles/:article_id --- error handling", () => {
-//   const validInput88 = { inc_votes: 88 };
+  test("when username provided is not in users DB, return 400 - Bad Request - User does not exist", () => {
+  const badInput = { username: "FREDDIE5000", body: "a valid body" };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(badInput)
+      .expect(400)
+      .then((data) => {
+        const expected = { msg: "Bad Request - User does not exist" };
+        expect(data.body).toEqual(expected);
+      });
+  });
 
-//   test("400 and {msg: Bad Request - no inc_votes provided} are returned when inc_votes not present", () => {
-//     return request(app)
-//       .patch("/api/articles/1")
-//       .send({ INC_VOTES_MISPELT: 22 })
-//       .expect(400)
-//       .then((data) => {
-//         const expected = { msg: "Bad Request - no inc_votes provided" };
-//         expect(data.body).toEqual(expected);
-//       });
-//   });
+  test("when article_id not an integer - return 400 Invalid article message", () => {
+    return request(app)
+      .post("/api/articles/BAD_ID_9000/comments")
+      .send(validInput)
+      .expect(400)
+      .then((data) => {
+        const expected = {
+          msg: "Invalid article was provided by client",
+        };
+        expect(data.body).toEqual(expected);
+      });
+  });
 
-//   test("400 and {msg: Bad Request - inc_votes must be an integer} are returned when inc_votes is not a number", () => {
-//     return request(app)
-//       .patch("/api/articles/1")
-//       .send({ inc_votes: "NOT A NUMBER" })
-//       .expect(400)
-//       .then((data) => {
-//         const expected = { msg: "Bad Request - inc_votes must be an integer" };
-//         expect(data.body).toEqual(expected);
-//       });
-//   });
-
-//   test("404 {msg: article not found} is returned when article is not found", () => {
-//     return request(app)
-//       .patch("/api/articles/100000")
-//       .send(validInput88)
-//       .expect(404)
-//       .then((data) => {
-//         const expected = { msg: "Article not found" };
-//         expect(data.body).toEqual(expected);
-//       });
-//   });
-//   test("400 {msg: Invalid article} is returned when article is invalid ID", () => {
-//     return request(app)
-//       .patch("/api/articles/RUBBISH2000")
-//       .send(validInput88)
-//       .expect(400)
-//       .then((data) => {
-//         const expected = { msg: "Bad Request - article_id must be an integer" };
-//         expect(data.body).toEqual(expected);
-//       });
-//   });
-// });
-
-
-
-
+  test("404 {msg: article not found} returned when article is not found", () => {
+    return request(app)
+      .post("/api/articles/888/comments")
+      .send(validInput)
+      .expect(404)
+      .then((data) => {
+        const expected = { msg: "Article not found" };
+        expect(data.body).toEqual(expected);
+      });
+  });
+});
 
 // ====== 09 ========
 describe("GET /api/users test suite", () => {
@@ -425,9 +412,9 @@ describe("GET /api/users test suite", () => {
         });
         expect(Array.isArray(data.body.users)).toBe(true);
       });
-    });
-    test("array received has 4 users which are taken from the test data, and in correct format", () => {
-      return request(app)
+  });
+  test("array received has 4 users which are taken from the test data, and in correct format", () => {
+    return request(app)
       .get("/api/users")
       .expect(200)
       .then((data) => {

@@ -9,10 +9,17 @@ exports.handleCustomErrors = (error, request, response, next) => {
         response.status(400).send({msg: error});
     } else if(error === "Invalid article provided by client - not possible to search comments"){
         response.status(400).send({msg: error});
+    } else if(error === "Bad Request - Invalid article_id - not possible to add comment"){
+        response.status(400).send({msg: error});
+    } else if(error === "Bad Request - User does not exist"){
+        response.status(400).send({msg: error});
     } else {
         next(error); //otherwise go to next error handler
     }
 };
+
+
+
 
 exports.handlePSQL400Error = (err, req, res, next) =>{
 //    console.log('PSQL error code :' + err);
