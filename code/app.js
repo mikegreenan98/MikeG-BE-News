@@ -11,6 +11,7 @@ const {
   getOneArticle,
   getArticles,
   getCommentsOnArticle,
+  pushArticleVotes,
 } = require("../code/controllers/controllers");
 
 // const {handleCustomErrors} = require('./error_handling_controllers');
@@ -24,15 +25,17 @@ app.use(express.json());
 // });
 
 
-
+// 03
 app.get("/api/topics", getTopics);
-
+// 04
 app.get("/api/articles", getArticles);
-
+// 05
 app.get("/api/articles/:articles_id", getOneArticle);
-
+// 06
 app.get("/api/articles/:articles_id/comments", getCommentsOnArticle);
 
+// 08
+app.patch("/api/articles/:articles_id", pushArticleVotes);
 
 
 //TBD - see advanced error handlines notes - insert here

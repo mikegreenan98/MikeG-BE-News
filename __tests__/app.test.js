@@ -270,8 +270,6 @@ describe("GET /api/articles/:article_id/comments --- error handling", () => {
         expect(data.body).toEqual(expected);
       });
   });
-
-
 });
 
 
@@ -289,3 +287,111 @@ describe("GET /api/articles/:article_id/comments --- error handling", () => {
 // });
 // });
 // });
+
+
+
+describe("PATCH /api/articles/:article_id", () => {
+  const validInput77 = { inc_votes: 77 };
+
+  test("200 status code received when calling api correctly", () => {
+    return request(app).patch("/api/articles/1").send(validInput77).expect(200);
+  });
+
+  test("data received in the format {article: [{}]} with a single object in the array when input body is valid", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send(validInput77)
+      .expect(200)
+      .then((data) => {
+        expect(data.body).toMatchObject({
+          article: expect.any(Object),
+        });
+        expect(Array.isArray(data.body.article)).toBe(true);
+        expect(data.body.article.length).toBe(1);
+      });
+  });
+
+  test("article received is valid article format", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send(validInput77)
+      .expect(200)
+      .then((data) => {
+        expect(data.body.article[0]).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+
+  test("The article's votes is increased by the provided inc_votes in the body of users message", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send(validInput77)
+      .expect(200)
+      .then((data) => {
+        expect(data.body.article[0].votes).toBe(100 + 77); //article 1 in test data is 100 at seed point
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id --- error handling", () => {
+  const validInput88 = { inc_votes: 88 };
+
+  test("400 and {msg: Bad Request - no inc_votes provided} are returned when inc_votes not present", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ INC_VOTES_MISPELT: 22 })
+      .expect(400)
+      .then((data) => {
+        const expected = { msg: "Bad Request - no inc_votes provided" };
+        expect(data.body).toEqual(expected);
+      });
+  });
+
+  test("400 and {msg: Bad Request - inc_votes must be an integer} are returned when inc_votes is not a number", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: "NOT A NUMBER" })
+      .expect(400)
+      .then((data) => {
+        const expected = { msg: "Bad Request - inc_votes must be an integer" };
+        expect(data.body).toEqual(expected);
+      });
+  });
+
+  test("404 {msg: article not found} is returned when article is not found", () => {
+    return request(app)
+      .patch("/api/articles/100000")
+      .send(validInput88)
+      .expect(404)
+      .then((data) => {
+        const expected = { msg: "Article not found" };
+        expect(data.body).toEqual(expected);
+      });
+  });
+  test("400 {msg: Invalid article} is returned when article is invalid ID", () => {
+    return request(app)
+      .patch("/api/articles/RUBBISH2000")
+      .send(validInput88)
+      .expect(400)
+      .then((data) => {
+        const expected = { msg: "Bad Request - article_id must be an integer" };
+        expect(data.body).toEqual(expected);
+      });
+  });
+});
+
+
+
+
+
+
+
+

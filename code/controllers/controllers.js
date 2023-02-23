@@ -5,6 +5,7 @@ const {
   selectArticles,
   selectOneArticle,
   selectCommentsForArticle,
+  updateArticleVotes,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -48,4 +49,14 @@ exports.getCommentsOnArticle = (req, res, next) => {
   .catch((err) => {
     next(err);
   });
+};
+
+exports.pushArticleVotes = (req, res, next) => {
+  updateArticleVotes(req)
+    .then((result) => {
+      res.status(200).send({ article: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
