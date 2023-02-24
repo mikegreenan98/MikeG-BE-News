@@ -9,6 +9,7 @@ const {
   selectUsers,
   selectOneUser,
   updateArticleVotes,
+  selectOneTopic,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -21,8 +22,9 @@ exports.getTopics = (req, res, next) => {
     });
 };
 
+
 exports.getArticles = (req, res, next) => {
-  selectArticles()
+  selectArticles(req)
     .then((result) => {
       res.status(200).send({ articles: result });
     })
@@ -64,17 +66,15 @@ exports.pushArticleVotes = (req, res, next) => {
     });
 };
 
-
 exports.postComment = (req, res, next) => {
   insertComment(req)
-  .then((result) => {
-    res.status(201).send({ comment: result });
-  })
-  .catch((err) => {
-    next(err);
-  });
+    .then((result) => {
+      res.status(201).send({ comment: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
-
 
 exports.getUsers = (req, res, next) => {
   selectUsers()

@@ -11,20 +11,98 @@ exports.selectTopics = () => {
   });
 };
 
-exports.selectArticles = () => {
-  let queryString = `SELECT articles.author, title, articles.article_id, topic,
+
+
+exports.selectArticles = (req) => {
+  // assign any queries received from the request
+  let sortQuery = req.query.sort_by;
+  let orderQuery = req.query.order;
+  let topicQuery = req.query.topic;
+
+  // create query string in 2 parts because possibly need to insert
+  // a 'WHERE ...' in the middle.
+  // finally query = querystring1 + querystring2
+  let queryString1 = `SELECT articles.author, title, articles.article_id, topic,
   articles.created_at, articles.votes, article_img_url,
   COUNT (comments.comment_id) AS comment_count
   FROM articles
   LEFT OUTER JOIN comments
-  ON comments.article_id = articles.article_id
-  GROUP BY articles.article_id
-  ORDER BY created_at DESC;`;
+  ON comments.article_id = articles.article_id`;
+  let queryString2 = ` GROUP BY articles.article_id`;
 
-  return db.query(queryString).then((result) => {
-    return result.rows;
+  // Deal with the order= query
+  const validOrderOptions = ["ASC", "DESC"];
+  let order = "";
+  if (orderQuery === undefined) {
+    //set DESC as default if not provided
+    order = "DESC";
+  } else if (validOrderOptions.includes(orderQuery)) {
+    order = orderQuery;
+  } else {
+    // if here we have an order=XYZ where XYZ is not valid - so reject 
+    return Promise.reject("Bad Request - Invalid query order= was provided");
+  }
+
+  //Deal with the sort_by= query
+  const validSortOptions = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+    "article_img_url",
+  ];
+  if (sortQuery === undefined) {
+    // default to sorting by 'created_at'
+    queryString2 += ` ORDER BY articles.created_at ${order};`;
+  } else if (validSortOptions.includes(sortQuery)) {
+    queryString2 += ` ORDER BY articles.${sortQuery} ${order};`;
+  } else {
+    // if here we have a sort_by=XYZ, where XYZ is not valid - so reject
+    return Promise.reject("Bad Request - Invalid query sort_by= was provided");
+  };
+
+  //Deal with topic= query
+  // first check the topic is in topics db (uless undefined, then OK) 
+  return selectOneTopic(topicQuery)
+  .then((rows) => {
+    if(rows.length === 0){
+      return Promise.reject("Not found - the topic does not exist");
+    }
+    if (topicQuery !== undefined) {
+      queryString1 += ` WHERE topic = '${topicQuery}'`;
+    };
+    let queryString = queryString1 + queryString2;
+    return db.query(queryString)
+    .then((result) => {
+      return result.rows;
+    })
   });
 };
+
+// utility function for use by SelectArticles
+function selectOneTopic (topic) {
+  //this function returns an array of one element either if the
+  // topic exists in db, or if undefined
+  if(topic === undefined){
+    //no need to query the db, return positive result
+    //and put a dummy value [1] in array 
+    return Promise.resolve([1]);
+  };
+  let queryString = `
+    SELECT *
+    FROM topics
+    WHERE slug = '${topic}'`;
+    return db.query(queryString).then((result) => {
+      return result.rows;
+    });
+};
+
+
+
+
 
 exports.selectOneArticle = (request) => {
   const articleID = request.params.articles_id;

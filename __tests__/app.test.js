@@ -518,4 +518,165 @@ describe("GET /api/users test suite", () => {
   });
 });
 
+// ========= 10 =========
+
+describe("GET with ORDER: /api/articles?order=", () => {
+  
+  test("when no order query provided, articles are sorted in descending order", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("created_at", { descending: true });
+    });
+  });
+  
+  test("if 'ASC' is provided the default 'DESC' order is reversed", () => {
+    return request(app)
+    .get("/api/articles?order=ASC")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("created_at", { ascending: true });
+    });
+  });
+  
+  test("if 'DESC' is provided, then same as default, order ascending", () => {
+    return request(app)
+    .get("/api/articles?order=DESC")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("created_at", { descending: true });
+    });
+  });
+
+  test("if order=BAD_REQUEST then a 400 Bad request is received", () => {
+    return request(app)
+    .get("/api/articles?order=BAD_REQUEST")
+    .expect(400)
+    .then((data) => {
+      expect(data.body).toEqual({ msg: "Bad Request - Invalid query order= was provided" });
+    });
+  });
+});
+
+describe("GET with SORT_BY: /api/articles?sort_by= , also, with ORDER= combo", () => {
+  
+  test("when no sort_by query provided, articles are sorted by date descending", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("created_at", { descending: true });
+    });
+  });
+
+  test("when sort_by=author is provided, returned data is sorted by author descending", () => {
+    return request(app)
+    .get("/api/articles?sort_by=author")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("author", { descending: true });
+    });
+  });
+  
+  test("when we get 'sort_by=title&order=ASC', returned data is sorted by title ascending", () => {
+    return request(app)
+    .get("/api/articles?sort_by=title&order=ASC")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("title", { ascending: true });
+    });
+  });
+  
+  test("when we get 'order=ASC&sort_by=votes', returned data is sorted by votes ascending", () => {
+    return request(app)
+    .get("/api/articles?order=ASC&sort_by=votes")
+    .expect(200)
+    .then((data) => {
+      const articlesArray = data.body.articles;
+      expect(articlesArray).toBeSortedBy("votes", { ascending: true });
+    });
+  });
+
+  test("if sort_by=BAD_REQUEST then a 400 Bad request is received", () => {
+    return request(app)
+    .get("/api/articles?sort_by=BAD_REQUEST77")
+    .expect(400)
+    .then((data) => {
+      expect(data.body).toEqual({ msg: "Bad Request - Invalid query sort_by= was provided" });
+    });
+  });
+});
+
+// NOTES on test data:
+// 'mitch' or 'cats' or 'paper' are the 3 topics in the topics db
+// in articles the hits for those are mitch(11), cats(1), paper(0)
+describe("GET with TOPIC=: /api/articles?topic=", () => {
+  test("when topic is omitted - returns all 12 articles in the db", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((data) => {
+        expect(data.body.articles.length).toEqual(12);
+      });
+  });
+
+  test("topic = mitch returns 11 articles", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then((data) => {
+        const articlesArray = data.body.articles;
+        expect(articlesArray.length).toEqual(11);
+        expect(articlesArray[3].topic).toEqual('mitch');
+        const mitchArray = articlesArray.filter(item => item.topic === 'mitch');
+        expect(mitchArray.length).toEqual(11);
+      });  
+    });    
+    
+    test("topic = paper returns zero articles - but is still a 200 status code and not an error", () => {
+      return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then((data) => {
+        expect(data.body.articles.length).toEqual(0);
+      });  
+    });    
+    
+    test("all 3 queries work together: ?topic=mitch&order=ASC&sort_by=votes  ====>  11 articles sorted by votes in ascending order", () => {
+      return request(app)
+      .get("/api/articles?topic=mitch&order=ASC&sort_by=votes")
+      .expect(200)
+      .then((data) => {
+        const articlesArray = data.body.articles;
+        expect(articlesArray.length).toEqual(11);
+        expect(articlesArray).toBeSortedBy("votes", { ascending: true });
+      });  
+    });    
+    
+    // test.only("when topic is not in the db, get an empty array and 200 status code", () => {
+    //   return request(app)
+    //   .get("/api/articles?topic=A_TOPIC_NOT_IN_DB")
+    //   .expect(200)
+    //   .then((data) => {
+    //     expect(data.body.articles.length).toEqual(0);
+    //   });
+    // });
+
+    test("when topic is not in the db, get 404", () => {
+      return request(app)
+      .get("/api/articles?topic=A_TOPIC_NOT_IN_DB")
+      .expect(404)
+      .then((data) => {
+      expect(data.body).toEqual({ msg: "Not found - the topic does not exist" });
+      });
+    });
+});
+
 
