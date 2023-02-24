@@ -632,7 +632,11 @@ describe("GET with TOPIC=: /api/articles?topic=", () => {
       .get("/api/articles?topic=mitch")
       .expect(200)
       .then((data) => {
-        expect(data.body.articles.length).toEqual(11);
+        const articlesArray = data.body.articles;
+        expect(articlesArray.length).toEqual(11);
+        expect(articlesArray[3].topic).toEqual('mitch');
+        const mitchArray = articlesArray.filter(item => item.topic === 'mitch');
+        expect(mitchArray.length).toEqual(11);
       });  
     });    
     
@@ -656,14 +660,23 @@ describe("GET with TOPIC=: /api/articles?topic=", () => {
       });  
     });    
     
-    test("when topic is not in the db, get an empty array and 200 status code", () => {
+    // test.only("when topic is not in the db, get an empty array and 200 status code", () => {
+    //   return request(app)
+    //   .get("/api/articles?topic=A_TOPIC_NOT_IN_DB")
+    //   .expect(200)
+    //   .then((data) => {
+    //     expect(data.body.articles.length).toEqual(0);
+    //   });
+    // });
+
+    test("when topic is not in the db, get 404", () => {
       return request(app)
       .get("/api/articles?topic=A_TOPIC_NOT_IN_DB")
-      .expect(200)
+      .expect(404)
       .then((data) => {
-        expect(data.body.articles.length).toEqual(0);
+      expect(data.body).toEqual({ msg: "Not found - the topic does not exist" });
       });
-  });
+    });
 });
 
 

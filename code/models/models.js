@@ -11,15 +11,6 @@ exports.selectTopics = () => {
   });
 };
 
-exports.selectOneTopic = (topic) => {
-    let queryString = `
-    SELECT *
-    FROM topics
-    WHERE slug = '${topic}'`;
-    return db.query(queryString).then((result) => {
-      return result.rows;
-    });
-};
 
 
 exports.selectArticles = (req) => {
@@ -73,18 +64,44 @@ exports.selectArticles = (req) => {
     return Promise.reject("Bad Request - Invalid query sort_by= was provided");
   };
 
-  //Deal with topic= query - but allow anything to be queried even if not in topics db
-  if (topicQuery !== undefined) {
-    queryString1 += ` WHERE topic = '${topicQuery}'`;
-  };
-
-  //Now finalise the querystring and make the query
-  let queryString = queryString1 + queryString2;
+  //Deal with topic= query
+  // first check the topic is in topics db (uless undefined, then OK) 
+  return selectOneTopic(topicQuery)
+  .then((rows) => {
+    if(rows.length === 0){
+      return Promise.reject("Not found - the topic does not exist");
+    }
+    if (topicQuery !== undefined) {
+      queryString1 += ` WHERE topic = '${topicQuery}'`;
+    };
+    let queryString = queryString1 + queryString2;
     return db.query(queryString)
     .then((result) => {
       return result.rows;
+    })
+  });
+};
+
+// utility function for use by SelectArticles
+function selectOneTopic (topic) {
+  //this function returns an array of one element either if the
+  // topic exists in db, or if undefined
+  if(topic === undefined){
+    //no need to query the db, return positive result
+    //and put a dummy value [1] in array 
+    return Promise.resolve([1]);
+  };
+  let queryString = `
+    SELECT *
+    FROM topics
+    WHERE slug = '${topic}'`;
+    return db.query(queryString).then((result) => {
+      return result.rows;
     });
 };
+
+
+
 
 
 exports.selectOneArticle = (request) => {

@@ -23,6 +23,8 @@ exports.handleCustomErrors = (error, request, response, next) => {
         response.status(400).send({msg: error});
     } else if(error === "Bad Request - Invalid query order= was provided"){
         response.status(400).send({msg: error});
+    } else if(error === "Not found - the topic does not exist"){
+        response.status(404).send({msg: error});
     } else {
         next(error); //otherwise go to next error handler
     };
