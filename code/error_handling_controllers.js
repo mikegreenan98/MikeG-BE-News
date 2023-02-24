@@ -9,6 +9,10 @@ exports.handleCustomErrors = (error, request, response, next) => {
         response.status(400).send({msg: error});
     } else if(error === "Invalid article provided by client - not possible to search comments"){
         response.status(400).send({msg: error});
+    } else if(error === "Bad Request - Invalid article_id - not possible to add comment"){
+        response.status(400).send({msg: error});
+    } else if(error === "Bad Request - User does not exist"){
+        response.status(404).send({msg: error});
     } else if(error === "Bad Request - no inc_votes provided"){
         response.status(400).send({msg: error});
     } else if(error === "Bad Request - inc_votes must be an integer"){
@@ -20,10 +24,17 @@ exports.handleCustomErrors = (error, request, response, next) => {
     };
 };
 
-exports.handlePSQL400Error = (err, req, res, next) =>{
-//    console.log('PSQL error code :' + err);
+exports.handlePSQLErrors = (err, req, res, next) =>{
+//    console.log('PSQL error code :' + err.code);
+//    console.log('PSQL error :' + err.detail);
 //    console.table(err);
-    res.status(500).send({msg: err});
+    if(err.code === "23503"){
+        res.status(404).send({msg: "Not found"});
+    } else if(err.code === "22P02"){
+        res.status(400).send({msg: "Bad request"});
+    } else {
+        next(err); //otherwise go to next error handler
+    };
 }
 
 exports.handle500Error = (err, req, res, next) => {
