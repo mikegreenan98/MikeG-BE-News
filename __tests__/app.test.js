@@ -682,7 +682,7 @@ describe("GET with TOPIC=: /api/articles?topic=", () => {
 describe('/api/', () => {
   test('reads the api.json file', () => {
     return request(app)
-      .get("/api")
+      .get("/api/")
       .expect(200)
       .then((data) => {
         expect(typeof data.body).toBe('object');

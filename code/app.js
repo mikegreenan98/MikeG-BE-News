@@ -39,7 +39,7 @@ app.patch("/api/articles/:articles_id", pushArticleVotes);
 // 09
 app.get("/api/users", getUsers);
 // 13
-app.get("/api/", getAPIs);
+app.get("/api/", getAPIs); 
 
 
 // error handlers below here - in order of call preferences
