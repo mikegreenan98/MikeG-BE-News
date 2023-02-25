@@ -1,5 +1,5 @@
 // MODELS
-
+const fs = require("fs/promises");
 const db = require("../../db/connection");
 
 exports.selectTopics = () => {
@@ -222,4 +222,15 @@ exports.selectOneUser = (req) => {
     return result.rows;
     }
   });
+};
+
+exports.readEndpointFile = () => {
+  console.log("here");
+  // return fs.readFile('../../db/endpoints.json', "utf8")
+  return fs.readFile('./db/endpoints.json', "utf8")
+  .then((data) => {
+    console.log(data);
+    return data;
+  });
+
 };
