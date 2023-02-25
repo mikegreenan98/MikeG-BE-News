@@ -12,6 +12,7 @@ const {
   getUsers,
   postComment,
   pushArticleVotes,
+  getAPIs,
 } = require("../code/controllers/controllers");
 
 app.use(express.json());
@@ -37,6 +38,9 @@ app.post("/api/articles/:articles_id/comments", postComment);
 app.patch("/api/articles/:articles_id", pushArticleVotes);
 // 09
 app.get("/api/users", getUsers);
+// 13
+app.get("/api/", getAPIs);
+
 
 // error handlers below here - in order of call preferences
 // i.e. 500 handler if nothing else handles the error

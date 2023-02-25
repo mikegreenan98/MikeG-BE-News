@@ -10,6 +10,7 @@ const {
   selectOneUser,
   updateArticleVotes,
   selectOneTopic,
+  readEndpointFile,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -84,4 +85,11 @@ exports.getUsers = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.getAPIs = (req, res, next) => {
+  readEndpointFile()
+  .then((result) => {
+    res.status(200).send(result);
+  })
 };
