@@ -1,7 +1,9 @@
 
 //   APP
 const express = require("express");
+const cors = require('cors');
 const app = express();
+app.use(cors());
 const {handleCustomErrors, handle500Error, handlePSQLErrors} = require('./error_handling_controllers');
 
 const {
